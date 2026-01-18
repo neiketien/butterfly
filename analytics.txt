@@ -1,0 +1,654 @@
+<?php
+session_start();
+
+if (!isset($_SESSION["admin_loggedin"]) || $_SESSION["admin_loggedin"] !== true) {
+    header("location: admin-login.php");
+    exit;
+}
+
+require_once __DIR__ . '/config.php'; // Defines $mysqli, $base_url_for_links, and MATOMO constants
+
+$user_id = $_SESSION["admin_id"];
+$user_fullname = $_SESSION["admin_fullname"];
+$user_email = $_SESSION["admin_email"];
+$user_role = $_SESSION["admin_role"];
+
+$first_name = strtok($user_fullname, ' ');
+$initials = '';
+$names = explode(' ', $user_fullname);
+$initials .= !empty($names[0]) ? strtoupper(substr($names[0], 0, 1)) : '';
+if (count($names) > 1 && !empty($names[count($names) - 1])) {
+    $initials .= strtoupper(substr($names[count($names) - 1], 0, 1));
+} elseif (strlen($initials) == 1 && strlen($names[0]) > 1) {    
+     $initials .= strtoupper(substr($names[0], 1, 1));
+}
+if (empty($initials)) $initials = "U";
+
+
+// --- Matomo API Data Fetching ---
+$matomo_data = [];
+$matomo_error = null;
+
+// Default date range: today
+$date_period = 'day';
+$date_value = 'today'; // Matomo API understands 'today', 'yesterday', 'last7', 'last30', etc.
+
+// Handle date range selection from query parameter (if implemented on frontend)
+if (isset($_GET['dateRange'])) {
+    // This mapping needs to be robust based on your frontend select values
+    // Example: 'td' -> 'today', '7d' -> 'last7', 'tmth' -> 'month', 'tyr' -> 'year'
+    $frontend_range = $_GET['dateRange'];
+    switch ($frontend_range) {
+        case 'td': $date_value = 'today'; $date_period = 'day'; break;
+        case 'ystd': $date_value = 'yesterday'; $date_period = 'day'; break;
+        case 'twk': $date_value = 'today'; $date_period = 'week'; break;
+        case 'tmth': $date_value = 'today'; $date_period = 'month'; break;
+        case '7d': $date_value = 'last7'; $date_period = 'range'; break;
+        case '30d': $date_value = 'last30'; $date_period = 'range'; break;
+        case '1y': $date_value = 'last365'; $date_period = 'range'; break;
+        default: $date_value = 'today'; $date_period = 'day';
+    }
+    if ($frontend_range === 'tmth') { // Special handling for 'this month'
+        $date_value = date('Y-m-d', strtotime('first day of this month')) . ',' . date('Y-m-d');
+        $date_period = 'range';
+    } elseif ($frontend_range === 'twk') { // Special handling for 'this week'
+         $date_value = date('Y-m-d', strtotime('monday this week')) . ',' . date('Y-m-d', strtotime('sunday this week'));
+         $date_period = 'range';
+    }
+}
+
+
+/**
+ * Fetches data from Matomo API.
+ * @param array $params API parameters.
+ * @return mixed Decoded JSON response or null on error.
+ */
+function fetchMatomoData(array $params) {
+    global $matomo_error; // Access global error variable
+
+    $default_params = [
+        'module' => 'API',
+        'idSite' => MATOMO_SITE_ID,
+        'format' => MATOMO_API_FORMAT,
+        'token_auth' => MATOMO_AUTH_TOKEN,
+    ];
+    $all_params = array_merge($default_params, $params);
+    $api_url = MATOMO_URL . '/index.php?' . http_build_query($all_params);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $api_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // 5 seconds connection timeout
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);      // 10 seconds total timeout
+    // If your Matomo uses HTTPS with a self-signed certificate (not recommended for production):
+    // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curl_error = curl_error($ch);
+    curl_close($ch);
+
+    if ($curl_error) {
+        $matomo_error = "cURL Error: " . $curl_error;
+        error_log("Matomo API cURL Error for " . $all_params['method'] . ": " . $curl_error . " (URL: " . $api_url . ")");
+        return null;
+    }
+    if ($http_code != 200) {
+        $matomo_error = "Matomo API HTTP Error: " . $http_code;
+        error_log("Matomo API HTTP Error " . $http_code . " for " . $all_params['method'] . ": " . $response . " (URL: " . $api_url . ")");
+        return null;
+    }
+
+    $decoded_response = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $matomo_error = "Matomo API JSON Decode Error: " . json_last_error_msg();
+        error_log("Matomo API JSON Decode Error for " . $all_params['method'] . ": " . json_last_error_msg() . " (Response: " . $response . ")");
+        return null;
+    }
+    if (isset($decoded_response['result']) && $decoded_response['result'] === 'error') {
+        $matomo_error = "Matomo API Error: " . ($decoded_response['message'] ?? 'Unknown error');
+        error_log("Matomo API Error for " . $all_params['method'] . ": " . ($decoded_response['message'] ?? 'Unknown error'));
+        return null;
+    }
+    return $decoded_response;
+}
+
+// --- Fetch Stats Cards Data ---
+$visits_summary = fetchMatomoData([
+    'method' => 'VisitsSummary.get',
+    'period' => $date_period, // 'day', 'week', 'month', 'year', 'range'
+    'date' => $date_value    // 'today', 'yesterday', 'YYYY-MM-DD', 'lastX', 'previousX', 'YYYY-MM-DD,YYYY-MM-DD'
+]);
+
+$matomo_data['unique_visitors'] = $visits_summary['nb_uniq_visitors'] ?? 0;
+$matomo_data['total_visits'] = $visits_summary['nb_visits'] ?? 0;
+$matomo_data['bounce_rate'] = rtrim($visits_summary['bounce_rate'] ?? '0%', '%'); // Remove % for potential calculation
+$matomo_data['avg_visit_duration_seconds'] = $visits_summary['avg_time_on_site'] ?? 0; // In seconds
+
+// Fetch comparison data (e.g., for "from last month")
+// This requires an additional API call for the previous period.
+// For simplicity, this example won't implement the percentage change calculation.
+// You'd call the API again with `date=previous30` if current is `last30` etc.
+$matomo_data['unique_visitors_change_text'] = "vs previous period"; // Placeholder
+$matomo_data['total_visits_change_text'] = "vs previous period";    // Placeholder
+$matomo_data['bounce_rate_change_text'] = "vs previous period";     // Placeholder
+$matomo_data['avg_visit_duration_change_text'] = "vs previous period"; // Placeholder
+// Determine if change is positive or negative based on comparison (e.g., for styling)
+$matomo_data['unique_visitors_change_direction'] = "neutral"; // positive, negative, neutral
+$matomo_data['total_visits_change_direction'] = "neutral";
+$matomo_data['bounce_rate_change_direction'] = "neutral"; // Lower bounce is good (positive change visually)
+$matomo_data['avg_visit_duration_change_direction'] = "neutral";
+
+
+// --- Fetch Audience Overview Chart Data ---
+// Get visits over time for the selected period.
+// If period is 'day', 'date' is 'today' or 'yesterday' -> API will give hourly data.
+// If period is 'range' (e.g. last7, last30), API will give daily data for the range.
+$audience_period_for_chart = 'day'; // For daily data points
+$api_period_for_audience_chart = $date_period;
+$api_date_for_audience_chart = $date_value;
+
+if ($date_period === 'day' && ($date_value === 'today' || $date_value === 'yesterday')) {
+    $api_period_for_audience_chart = 'hour'; // Get hourly data for a single day
+}
+
+$audience_data_raw = fetchMatomoData([
+    'method' => 'VisitsSummary.get',
+    'period' => $api_period_for_audience_chart,
+    'date' => $api_date_for_audience_chart,
+    // 'filter_limit' => 30 // Adjust if needed
+]);
+
+$matomo_data['audience_chart_labels'] = [];
+$matomo_data['audience_chart_visits'] = [];
+if (is_array($audience_data_raw) && !isset($audience_data_raw['result'])) { // If it's an array of date/data pairs
+    foreach ($audience_data_raw as $date => $data) {
+        $matomo_data['audience_chart_labels'][] = $date; // Or format date nicely
+        $matomo_data['audience_chart_visits'][] = $data['nb_visits'] ?? 0;
+    }
+} elseif(is_array($audience_data_raw) && isset($audience_data_raw['nb_visits'])) { // Single day summary
+    $matomo_data['audience_chart_labels'][] = $date_value;
+    $matomo_data['audience_chart_visits'][] = $audience_data_raw['nb_visits'] ?? 0;
+}
+
+
+// --- Fetch Traffic Sources Data (for doughnut chart) ---
+$traffic_sources_raw = fetchMatomoData([
+    'method' => 'Referrers.getReferrerType',
+    'period' => $date_period,
+    'date' => $date_value
+]);
+$matomo_data['traffic_sources'] = [];
+if (is_array($traffic_sources_raw)) {
+    foreach ($traffic_sources_raw as $source) {
+        if (isset($source['label']) && isset($source['nb_visits'])) {
+             $matomo_data['traffic_sources'][$source['label']] = $source['nb_visits'];
+        }
+    }
+}
+
+
+// --- Fetch Top Pages Data ---
+$top_pages_raw = fetchMatomoData([
+    'method' => 'Actions.getPageUrls',
+    'period' => $date_period,
+    'date' => $date_value,
+    'flat' => 1, // Get a flat list
+    'filter_limit' => 5
+]);
+$matomo_data['top_pages'] = [];
+if (is_array($top_pages_raw)) {
+    foreach ($top_pages_raw as $page) {
+        if (isset($page['label']) && isset($page['nb_visits']) && isset($page['bounce_rate'])) {
+            $matomo_data['top_pages'][] = [
+                'label' => $page['label'],
+                'visits' => $page['nb_visits'],
+                'bounce_rate' => $page['bounce_rate'] ?? '0%'
+            ];
+        }
+    }
+}
+
+// --- Fetch Top Countries Data ---
+$top_countries_raw = fetchMatomoData([
+    'method' => 'UserCountry.getCountry',
+    'period' => $date_period,
+    'date' => $date_value,
+    'filter_limit' => 5
+]);
+$matomo_data['top_countries'] = [];
+if (is_array($top_countries_raw)) {
+    foreach ($top_countries_raw as $country) {
+         if (isset($country['label']) && isset($country['code']) && isset($country['nb_visits'])) { // Matomo usually provides 'code'
+            $matomo_data['top_countries'][] = [
+                'label' => $country['label'],
+                'code' => $country['code'] ?? 'UN', // Fallback code
+                'visits' => $country['nb_visits'],
+                'conversion_rate' => ($country['conversion_rate'] ?? '0%') // Example, if you track conversions
+            ];
+        }
+    }
+}
+
+
+// --- Fetch Device Breakdown Data (for pie chart) ---
+$device_breakdown_raw = fetchMatomoData([
+    'method' => 'DevicesDetection.getType',
+    'period' => $date_period,
+    'date' => $date_value
+]);
+$matomo_data['device_breakdown'] = [];
+if (is_array($device_breakdown_raw)) {
+    foreach ($device_breakdown_raw as $device) {
+         if (isset($device['label']) && isset($device['nb_visits'])) {
+            $matomo_data['device_breakdown'][$device['label']] = $device['nb_visits'];
+        }
+    }
+}
+
+// Format avg_visit_duration_seconds for display (e.g., 3m 15s)
+$avg_dur_s = $matomo_data['avg_visit_duration_seconds'];
+$avg_dur_m = floor($avg_dur_s / 60);
+$avg_dur_rem_s = $avg_dur_s % 60;
+$matomo_data['avg_visit_duration_formatted'] = sprintf("%dm %02ds", $avg_dur_m, $avg_dur_rem_s);
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Southern Bee | Analytics</title>
+  <meta name="description" content="Website and content engagement analytics">
+  <script src="<?php echo BASE_URL_FOR_LINKS; ?>/assets/js/theme.js"></script>
+  <link rel="stylesheet" href="<?php echo BASE_URL_FOR_LINKS; ?>/assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    :root { 
+      --background: 0 0% 100%; --foreground: 222.2 84% 4.9%; --card: 0 0% 100%; --card-foreground: 222.2 84% 4.9%; --popover: 0 0% 100%; --popover-foreground: 222.2 84% 4.9%; --primary: 221.2 83.2% 53.3%; --primary-foreground: 210 40% 98%; --secondary: 210 40% 96%; --secondary-foreground: 222.2 84% 4.9%; --muted: 210 40% 96%; --muted-foreground: 215.4 16.3% 46.9%; --accent: 210 40% 96%; --accent-foreground: 222.2 84% 4.9%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 210 40% 98%; --border: 214.3 31.8% 91.4%; --input: 214.3 31.8% 91.4%; --ring: 221.2 83.2% 53.3%; --radius: 0.5rem; --success: 142.1 76.2% 36.3%; --warning: 47.9 95.8% 53.1%;
+    }
+    [data-theme="dark"] {
+      --background: 222.2 84% 4.9%; --foreground: 210 40% 98%; --card: 222.2 84% 4.9%; --card-foreground: 210 40% 98%; --popover: 222.2 84% 4.9%; --popover-foreground: 210 40% 98%; --primary: 217.2 91.2% 59.8%; --primary-foreground: 222.2 84% 4.9%; --secondary: 217.2 32.6% 17.5%; --secondary-foreground: 210 40% 98%; --muted: 217.2 32.6% 17.5%; --muted-foreground: 215 20.2% 65.1%; --accent: 217.2 32.6% 17.5%; --accent-foreground: 210 40% 98%; --destructive: 0 62.8% 30.6%; --destructive-foreground: 210 40% 98%; --border: 217.2 32.6% 17.5%; --input: 217.2 32.6% 17.5%; --ring: 224.3 76.3% 94.1%; --success: 142.1 70.6% 45.3%; --warning: 47.9 95.8% 53.1%;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: hsl(var(--background)); color: hsl(var(--foreground)); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    .dashboard { min-height: 100vh; display: flex; flex-direction: column; }
+    .dashboard-header { border-bottom: 1px solid hsl(var(--border)); background-color: hsl(var(--background)); position: sticky; top: 0; z-index: 50; backdrop-filter: blur(8px); }
+    .header-container { display: flex; height: 60px; align-items: center; justify-content: space-between; padding: 0 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
+    .logo { font-size: 20px; font-weight: 700; color: hsl(var(--foreground)); }
+    .header-nav { display: flex; align-items: center; gap: 24px; }
+    .nav-links { display: flex; align-items: center; gap: 24px; list-style: none; margin: 0; padding: 0; }
+    .nav-link { color: hsl(var(--muted-foreground)); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; padding: 8px 0; }
+    .nav-link:hover, .nav-link.active { color: hsl(var(--foreground)); }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .search-container { position: relative; display: flex; align-items: center; }
+    .search-input { width: 240px; height: 36px; padding: 0 12px 0 36px; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background-color: hsl(var(--background)); font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .search-input:focus { border-color: hsl(var(--ring)); }
+    .search-input::placeholder { color: hsl(var(--muted-foreground)); }
+    .search-icon { position: absolute; left: 12px; width: 16px; height: 16px; color: hsl(var(--muted-foreground)); }
+    .icon-button { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: none; color: hsl(var(--muted-foreground)); border-radius: calc(var(--radius) - 2px); cursor: pointer; transition: all 0.2s; }
+    .icon-button:hover { background-color: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+    .user-menu { position: relative; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)) 50%, hsl(var(--secondary))); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: hsl(var(--primary-foreground)); cursor: pointer; border: 2px solid hsl(var(--border)); }
+    .user-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 220px; background-color: hsl(var(--popover)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); opacity: 0; visibility: hidden; transform: translateY(-4px); transition: all 0.2s; z-index: 50; }
+    .user-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .user-details { display: flex; align-items: center; gap: 7px; padding: 12px 16px; }
+    .small-user-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)) 50%, hsl(var(--secondary))); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: hsl(var(--primary-foreground)); flex-shrink: 0; }
+    .user-component { display: flex; flex-direction: column; line-height: 1.3; }
+    .user-component b { font-size: 14px; font-weight: 600; color: hsl(var(--foreground)); margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+    .user-component p { font-size: 11px; font-weight: 400; color: hsl(var(--muted-foreground)); margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;}
+    .dropdown-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 14px; color: hsl(var(--foreground)); text-decoration: none; transition: background-color 0.2s; }
+    .dropdown-item:hover { background-color: hsl(var(--accent)); }
+    .dropdown-separator { height: 1px; background-color: hsl(var(--border)); margin: 4px 0; }
+    .main-container { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 24px; }
+    .page-header { margin-bottom: 32px; }
+    .page-title { font-size: 32px; font-weight: 700; color: hsl(var(--foreground)); margin: 0 0 8px 0; }
+    .page-description { color: hsl(var(--muted-foreground)); font-size: 16px; margin: 0; }
+    .filter-controls { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+    .filter-select { padding: 8px 12px; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background-color: hsl(var(--background)); color: hsl(var(--foreground)); font-size: 14px; cursor: pointer; outline: none; transition: border-color 0.2s; }
+    .filter-select:focus { border-color: hsl(var(--ring)); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background-color: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 24px; transition: box-shadow 0.2s; }
+    .stat-card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .stat-title { font-size: 14px; font-weight: 500; color: hsl(var(--muted-foreground)); }
+    .stat-icon { width: 16px; height: 16px; color: hsl(var(--muted-foreground)); }
+    .stat-value { font-size: 32px; font-weight: 700; color: hsl(var(--foreground)); margin-bottom: 8px; }
+    .stat-change { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; }
+    .stat-change.positive { color: hsl(var(--success)); }
+    .stat-change.negative { color: hsl(var(--destructive)); }
+    .card { background-color: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); margin-bottom: 24px; overflow: hidden; }
+    .card-header { padding: 24px 24px 0 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .card-title { font-size: 18px; font-weight: 600; color: hsl(var(--foreground)); margin: 0; flex: 1; }
+    .card-body { padding: 24px; }
+    .chart-container { position: relative; height: 300px; margin-bottom: 16px; }
+    .chart-no-data-message { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; align-items: center; justify-content: center; font-size: 16px; color: hsl(var(--muted-foreground)); background-color: hsl(var(--card)); z-index: 10; padding: 20px; box-sizing: border-box; text-align: center; }
+    .table-container { overflow-x: auto; border-radius: calc(var(--radius) - 2px); border: 1px solid hsl(var(--border)); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .data-table th { background-color: hsl(var(--muted) / 0.5); color: hsl(var(--muted-foreground)); font-weight: 500; text-align: left; padding: 12px 16px; border-bottom: 1px solid hsl(var(--border)); }
+    .data-table td { padding: 12px 16px; border-bottom: 1px solid hsl(var(--border)); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover { background-color: hsl(var(--muted) / 0.3); }
+    .progress-bar { width: 100%; height: 8px; background-color: hsl(var(--muted)); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background-color: hsl(var(--primary)); transition: width 0.3s ease; }
+    .country-row { display: flex; align-items: center; gap: 8px; }
+    .country-flag { width: 20px; height: 15px; border-radius: 2px; background: linear-gradient(45deg, #f0f0f0, #e0e0e0); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; }
+    .analytics-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .analytics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; font-size: 14px; font-weight: 500; border-radius: calc(var(--radius) - 2px); border: 1px solid transparent; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .button-outline { border-color: hsl(var(--border)); background-color: transparent; color: hsl(var(--foreground)); }
+    .button-outline:hover { background-color: hsl(var(--accent)); }
+    .matomo-error-message { background-color: hsl(var(--destructive) / 0.1); color: hsl(var(--destructive)); border: 1px solid hsl(var(--destructive) / 0.5); padding: 15px; margin-bottom: 20px; border-radius: var(--radius); }
+    @media (max-width: 1024px) { .analytics-grid { grid-template-columns: 1fr; } .analytics-row { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .header-container { padding: 0 16px; } .main-container { padding: 16px; } .nav-links { display: none; } .search-input { width: 180px; } .stats-grid { grid-template-columns: 1fr; } .filter-controls { flex-direction: column; } }      
+    .footer { border-top: 1px solid hsl(var(--border)); padding: 24px; text-align: center; color: hsl(var(--muted-foreground)); font-size: 12px; margin-top: auto; }
+  </style>
+</head>
+<body>   
+  <div class="dashboard">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="header-container">
+        <div class="logo">The Bee</div>
+        <nav class="header-nav">
+          <ul class="nav-links">
+            <li><a href="dashboard.php" class="nav-link">Dashboard</a></li>
+            <li><a href="article.php" class="nav-link">Articles</a></li>
+            <li><a href="analytics.php" class="nav-link active">Analytics</a></li>
+            <?php if ($user_role === 'Admin'): ?>
+              <li><a href="users.php" class="nav-link">Users</a></li>
+            <?php endif; ?>
+          </ul>
+        </nav>
+        <div class="header-actions">
+          <div class="search-container">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" class="search-input" placeholder="Search...">
+          </div>
+          <button class="icon-button" title="Notifications"><svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+          <div class="user-menu">
+            <div class="user-avatar" title="<?php echo htmlspecialchars($user_fullname); ?>"><?php echo htmlspecialchars($initials); ?></div>
+            <div class="user-dropdown">
+              <div class="user-details"><div class="small-user-avatar"><?php echo htmlspecialchars($initials); ?></div><div class="user-component"><b title="<?php echo htmlspecialchars($user_fullname); ?>"><?php echo htmlspecialchars($user_fullname); ?></b><p title="<?php echo htmlspecialchars($user_email); ?>"><?php echo htmlspecialchars($user_email); ?></p></div></div>
+              <div class="dropdown-separator"></div><a href="analytics.php" class="dropdown-item">Analytics</a><a href="article.php" class="dropdown-item">Articles</a>
+              <div class="dropdown-separator"></div><a href="profile.php" class="dropdown-item">Profile</a><a href="settings.php" class="dropdown-item">Settings</a>
+              <div class="dropdown-separator"></div><a href="admin-logout.php" class="dropdown-item">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-container">
+      <div class="page-header">
+        <h1 class="page-title">Analytics Overview</h1>
+        <p class="page-description">Track your website performance and content engagement powered by Matomo.</p>
+      </div>
+
+      <?php if ($matomo_error): ?>
+        <div class="matomo-error-message">
+            <strong>Error fetching analytics data:</strong> <?php echo htmlspecialchars($matomo_error); ?>
+            <br>Please check your Matomo configuration and ensure the Matomo instance is accessible.
+        </div>
+      <?php endif; ?>
+      
+      <div class="filter-controls">
+        <form method="GET" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+            <select class="filter-select" name="dateRange" id="dateRange" onchange="this.form.submit()">
+                <option value="td" <?php echo ($date_value === 'today' && $date_period === 'day') ? 'selected' : ''; ?>>Today</option>
+                <option value="ystd" <?php echo ($date_value === 'yesterday') ? 'selected' : ''; ?>>Yesterday</option>
+                <option value="twk" <?php echo ($date_value === date('Y-m-d', strtotime('monday this week')) . ',' . date('Y-m-d', strtotime('sunday this week'))) ? 'selected' : ''; ?>>This Week</option>
+                <option value="tmth" <?php echo ($date_value === date('Y-m-d', strtotime('first day of this month')) . ',' . date('Y-m-d')) ? 'selected' : ''; ?>>This Month</option>
+                <option value="7d" <?php echo ($date_value === 'last7') ? 'selected' : ''; ?>>Last 7 Days</option>
+                <option value="30d" <?php echo ($date_value === 'last30') ? 'selected' : ''; ?>>Last 30 Days</option>
+                <option value="1y" <?php echo ($date_value === 'last365') ? 'selected' : ''; ?>>Last Year</option>
+            </select>
+            <noscript><button type="submit" class="button button-outline" style="margin-left:10px;">Apply Filter</button></noscript>
+        </form>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-title">Unique Visitors</div><svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+          <div class="stat-value" id="statUniqueVisitorsValue"><?php echo number_format($matomo_data['unique_visitors']); ?></div>
+          <div class="stat-change <?php echo $matomo_data['unique_visitors_change_direction']; ?>" id="statUniqueVisitorsChange">
+             <!-- Icons will be dynamically set by JS if change data is available -->
+             <span id="statUniqueVisitorsChangeText"><?php echo htmlspecialchars($matomo_data['unique_visitors_change_text']); ?></span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-title">Total Visits</div><svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></div>
+          <div class="stat-value" id="statTotalVisitsValue"><?php echo number_format($matomo_data['total_visits']); ?></div>
+          <div class="stat-change <?php echo $matomo_data['total_visits_change_direction']; ?>" id="statTotalVisitsChange"><span id="statTotalVisitsChangeText"><?php echo htmlspecialchars($matomo_data['total_visits_change_text']); ?></span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-title">Bounce Rate</div><svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg></div>
+          <div class="stat-value" id="statBounceRateValue"><?php echo htmlspecialchars($matomo_data['bounce_rate']); ?>%</div>
+          <div class="stat-change <?php echo $matomo_data['bounce_rate_change_direction']; ?>" id="statBounceRateChange"><span id="statBounceRateChangeText"><?php echo htmlspecialchars($matomo_data['bounce_rate_change_text']); ?></span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-title">Avg. Visit Duration</div><svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+          <div class="stat-value" id="statAvgVisitDurationValue"><?php echo htmlspecialchars($matomo_data['avg_visit_duration_formatted']); ?></div>
+          <div class="stat-change <?php echo $matomo_data['avg_visit_duration_change_direction']; ?>" id="statAvgVisitDurationChange"><span id="statAvgVisitDurationChangeText"><?php echo htmlspecialchars($matomo_data['avg_visit_duration_change_text']); ?></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Audience Overview</h3><button class="button button-outline">View Report</button></div>
+        <div class="card-body">
+          <div class="chart-container">
+            <canvas id="audienceChart"></canvas>
+            <div id="audienceChartNoData" class="chart-no-data-message" <?php if (!empty($matomo_data['audience_chart_visits'])) echo 'style="display: none;"'; else echo 'style="display: flex;"';?>>
+                No audience data available for the selected period.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Page Analytics</h3><a href="#" class="button button-outline">View All</a></div>
+          <div class="card-body">
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>Article</th><th>Views</th><th>Bounce Rate</th></tr></thead>
+                <tbody>
+                <?php if (!empty($matomo_data['top_pages'])): ?>
+                    <?php foreach($matomo_data['top_pages'] as $page): ?>
+                    <tr><td><?php echo htmlspecialchars($page['label']); ?></td><td><?php echo number_format($page['visits']); ?></td><td><?php echo htmlspecialchars($page['bounce_rate']); ?></td></tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="3" style="text-align:center;">No page data available.</td></tr>
+                <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Traffic Sources</h3></div>
+          <div class="card-body"><div class="chart-container" style="height: 260px;"><canvas id="trafficSourcesChart"></canvas><div id="trafficSourcesChartNoData" class="chart-no-data-message" <?php if (!empty($matomo_data['traffic_sources'])) echo 'style="display: none;"'; else echo 'style="display: flex;"';?>>No traffic source data.</div></div></div>
+        </div>
+      </div>
+
+      <div class="analytics-row">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Top Countries</h3></div>
+          <div class="card-body">
+            <div class="table-container">
+              <table class="data-table">
+                <thead><tr><th>Country</th><th>Visitors</th><th>Conversion</th></tr></thead>
+                <tbody>
+                <?php if (!empty($matomo_data['top_countries'])): ?>
+                    <?php foreach($matomo_data['top_countries'] as $country): ?>
+                    <tr><td><div class="country-row"><span class="country-flag"><?php echo htmlspecialchars(strtoupper($country['code'])); ?></span><span><?php echo htmlspecialchars($country['label']); ?></span></div></td><td><?php echo number_format($country['visits']); ?></td><td><?php echo htmlspecialchars($country['conversion_rate']); ?></td></tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="3" style="text-align:center;">No country data available.</td></tr>
+                <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Device Breakdown</h3></div>
+          <div class="card-body"><div class="chart-container" style="height: 260px;"><canvas id="deviceBreakdownChart"></canvas><div id="deviceBreakdownChartNoData" class="chart-no-data-message" <?php if (!empty($matomo_data['device_breakdown'])) echo 'style="display: none;"'; else echo 'style="display: flex;"';?>>No device data.</div></div></div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">© <?php echo date("Y"); ?> Southern Bee. All rights reserved.</footer>
+  </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+  // User Dropdown
+  const userAvatar = document.querySelector('.user-avatar');
+  const userDropdown = document.querySelector('.user-dropdown');
+  if (userAvatar && userDropdown) {
+    const userMenu = document.querySelector('.user-menu');
+    userAvatar.addEventListener('click', (event) => { event.stopPropagation(); userDropdown.classList.toggle('active'); });
+    document.addEventListener('click', (event) => { if (userMenu && !userMenu.contains(event.target)) userDropdown.classList.remove('active'); });
+    userDropdown.addEventListener('click', (event) => event.stopPropagation());
+  }
+  const hslToRgba = (hsl, alpha = 1) => {
+      const [h, s, l] = hsl.match(/\d+/g).map(Number);
+      const k = n => (n + h / 30) % 12;
+      const a = s / 100 * Math.min(l / 100, 1 - l / 100);
+      const f = n => l / 100 - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      const r = Math.round(255 * f(0));
+      const g = Math.round(255 * f(8));
+      const b = Math.round(255 * f(4));
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  const primaryColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
+  const secondaryColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim());
+  const mutedColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--muted').trim());
+  const foregroundColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim());
+  const successColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--success').trim());
+  const warningColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--warning').trim());
+  const destructiveColor = hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--destructive').trim());
+  const commonChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: foregroundColor } }
+    },
+    scales: {
+      x: { ticks: { color: foregroundColor }, grid: { color: hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--border').trim(), 0.1) } },
+      y: { ticks: { color: foregroundColor }, grid: { color: hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--border').trim(), 0.1) } }
+    }
+  };
+  // Audience Overview Chart
+  const audienceCtx = document.getElementById('audienceChart')?.getContext('2d');
+  const audienceLabels = <?php echo json_encode(array_values($matomo_data['audience_chart_labels'])); ?>;
+  const audienceVisits = <?php echo json_encode(array_values($matomo_data['audience_chart_visits'])); ?>;
+
+  if (audienceCtx && audienceLabels.length > 0 && audienceVisits.length > 0) {
+    document.getElementById('audienceChartNoData').style.display = 'none';
+    new Chart(audienceCtx, {
+      type: 'line',
+      data: {
+        labels: audienceLabels,
+        datasets: [{
+          label: 'Visits',
+          data: audienceVisits,
+          borderColor: primaryColor,
+          backgroundColor: hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(), 0.1),
+          tension: 0.1,
+          fill: true
+        }]
+      },
+      options: commonChartOptions
+    });
+  } else if (audienceCtx) {
+     document.getElementById('audienceChartNoData').style.display = 'flex';
+  }
+
+
+  // Traffic Sources Chart
+  const trafficCtx = document.getElementById('trafficSourcesChart')?.getContext('2d');
+  const trafficData = <?php echo json_encode($matomo_data['traffic_sources']); ?>;
+  if (trafficCtx && Object.keys(trafficData).length > 0) {
+    document.getElementById('trafficSourcesChartNoData').style.display = 'none';
+    new Chart(trafficCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(trafficData),
+        datasets: [{
+          label: 'Traffic Sources',
+          data: Object.values(trafficData),
+          backgroundColor: [primaryColor, successColor, warningColor, hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim())],
+          borderColor: hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--card').trim()),
+          hoverOffset: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: foregroundColor } } } }
+    });
+  } else if (trafficCtx) {
+      document.getElementById('trafficSourcesChartNoData').style.display = 'flex';
+  }
+
+  // Device Breakdown Chart
+  const deviceCtx = document.getElementById('deviceBreakdownChart')?.getContext('2d');
+  const deviceData = <?php echo json_encode($matomo_data['device_breakdown']); ?>;
+  if (deviceCtx && Object.keys(deviceData).length > 0) {
+    document.getElementById('deviceBreakdownChartNoData').style.display = 'none';
+    new Chart(deviceCtx, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(deviceData),
+        datasets: [{
+          label: 'Device Types',
+          data: Object.values(deviceData),
+          backgroundColor: [primaryColor, successColor, warningColor, hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim())],
+          borderColor: hslToRgba(getComputedStyle(document.documentElement).getPropertyValue('--card').trim()),
+          hoverOffset: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: foregroundColor } } } }
+    });
+  } else if (deviceCtx) {
+      document.getElementById('deviceBreakdownChartNoData').style.display = 'flex';
+  }
+  
+  // Update stat change icons based on direction
+  function updateStatChangeIcon(elementId, direction) {
+    const iconElement = document.getElementById(elementId);
+    if (iconElement) {
+        if (direction === 'positive') {
+            iconElement.innerHTML = '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline>'; // Up arrow
+        } else if (direction === 'negative') {
+            iconElement.innerHTML = '<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline>'; // Down arrow
+        } else { // neutral or no significant change
+            iconElement.innerHTML = '<line x1="5" y1="12" x2="19" y2="12"></line>'; // Horizontal line
+        }
+    }
+  }
+
+  updateStatChangeIcon('statUniqueVisitorsChangeIcon', '<?php echo $matomo_data['unique_visitors_change_direction']; ?>');
+  updateStatChangeIcon('statTotalVisitsChangeIcon', '<?php echo $matomo_data['total_visits_change_direction']; ?>');
+  // For bounce rate, "negative" change in value is good, so icon should be "positive" (green arrow)
+  const bounceRateDirection = '<?php echo $matomo_data['bounce_rate_change_direction']; ?>';
+  if (bounceRateDirection === 'negative') updateStatChangeIcon('statBounceRateChangeIcon', 'positive');
+  else if (bounceRateDirection === 'positive') updateStatChangeIcon('statBounceRateChangeIcon', 'negative');
+  else updateStatChangeIcon('statBounceRateChangeIcon', 'neutral');
+  
+  updateStatChangeIcon('statAvgVisitDurationChangeIcon', '<?php echo $matomo_data['avg_visit_duration_change_direction']; ?>');
+
+});
+</script>
+</body>
+</html>
+<?php
+if (isset($mysqli) && $mysqli instanceof mysqli) {
+    $mysqli->close();
+}
+?>

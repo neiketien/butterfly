@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Causes - Aid Without Borders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles from original file */
+        :root{--primary:#111e48;--primary-dark:#42458a;--secondary:#34a853;--accent:#f9ab00;--dark:#202124;--light:#f8f9fa;--gray:#5f6368;--light-gray:#dadce0;--card-shadow:0 8px 30px rgba(0,0,0,.08);--transition:all .3s ease}*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Poppins',sans-serif;color:var(--dark);background-color:#fff;line-height:1.6;overflow-x:hidden}.container{width:100%;max-width:1200px;margin:0 auto;padding:0 20px}header{background-color:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(0,0,0,.05);position:relative;width:100%;top:0;z-index:1000;backdrop-filter:blur(5px)}.navbar{display:flex;justify-content:space-between;align-items:center;padding:20px 0}.logo img{width:80px;height:auto;display:flex;align-items:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;margin-right:250px;color:var(--primary)}.logo{color:var(--primary)}.navbar i{padding-top:10px;font-size:25px}.nav-links{display:flex;list-style:none}.nav-links li{margin-left:30px}.nav-links a{text-decoration:none;color:var(--dark);font-weight:500;font-size:16px;transition:var(--transition);position:relative}.nav-links a:after{content:'';position:absolute;bottom:-5px;left:0;width:0;height:2px;background:var(--primary);transition:var(--transition)}.nav-links a:hover:after{width:100%}.nav-links a:hover{color:var(--primary)}.nav-btn{background:var(--primary);color:#fff!important;padding:10px 20px;border-radius:30px;font-weight:600;transition:var(--transition)}.nav-btn:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 5px 15px rgba(26,115,232,.3)}.nav-btn:after{display:none}.btn{padding:15px 30px;border-radius:30px;font-weight:600;text-decoration:none;display:inline-block;transition:var(--transition);text-align:center;font-size:16px;border:none;cursor:pointer}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark);transform:translateY(-3px);box-shadow:0 8px 20px rgba(26,115,232,.4)}.btn-secondary{background:#fff;color:var(--primary);border:2px solid var(--primary)}.btn-secondary:hover{background:rgba(26,115,232,.05);transform:translateY(-3px)}.section-title{text-align:center;margin-bottom:60px}.section-title h2{font-family:'Montserrat',sans-serif;font-size:2.5rem;color:var(--dark);margin-bottom:15px;position:relative;display:inline-block}.section-title h2:after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:80px;height:4px;background:var(--accent);border-radius:2px}.section-title p{font-size:1.2rem;color:var(--gray);max-width:700px;margin:20px auto 0}.page-header{padding:80px 0;background:var(--light);margin-top:85px}.causes-section{padding:80px 0}.causes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px}.cause-card{background:#fff;padding:40px;border-radius:15px;box-shadow:var(--card-shadow);border-left:5px solid var(--primary);transition:var(--transition)}.cause-card:hover{transform:translateY(-5px);border-left-color:var(--accent)}.cause-icon{font-size:3rem;color:var(--primary);margin-bottom:20px}.cause-card h3{font-size:1.5rem;margin-bottom:15px}.cause-card ul{list-style:none;padding-left:0}.cause-card ul li{margin-bottom:10px;color:var(--gray)}.cause-card ul li a{color:var(--gray);text-decoration:none;transition:var(--transition)}.cause-card ul li a:hover{color:var(--primary);padding-left:5px}footer{background:var(--dark);color:#fff;padding:70px 0 30px}.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:40px;margin-bottom:50px}.footer-col h3{font-size:1.3rem;margin-bottom:25px;position:relative;padding-bottom:10px}.footer-col h3:after{content:'';position:absolute;bottom:0;left:0;width:40px;height:3px;background:var(--accent)}.footer-col p{color:#bdc1c6;margin-bottom:20px;font-size:.95rem}.footer-links{list-style:none}.footer-links li{margin-bottom:12px}.footer-links a{color:#bdc1c6;text-decoration:none;transition:var(--transition);font-size:.95rem}.footer-links a:hover{color:#fff;padding-left:5px}.social-links{display:flex;gap:15px;margin-top:20px}.social-links a{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;transition:var(--transition);text-decoration:none}.social-links a:hover{background:var(--primary);transform:translateY(-3px)}.copyright{text-align:center;padding-top:30px;border-top:1px solid rgba(255,255,255,.1);color:#9aa0a6;font-size:.9rem}
+        
+        /* Hamburger Menu */
+        .hamburger-menu{display:none;font-size:24px;cursor:pointer;color:var(--dark)}
+        
+        /* Modal Base Styles */
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}.modal-overlay.active{opacity:1;visibility:visible}.modal-content{background:#fff;padding:40px;border-radius:15px;width:90%;max-width:500px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.2);transform:scale(.95);transition:transform .3s ease}.modal-overlay.active .modal-content{transform:scale(1)}.modal-close{position:absolute;top:15px;right:15px;background:0 0;border:none;font-size:28px;line-height:1;color:var(--gray);cursor:pointer}.modal-step h2{font-family:'Montserrat',sans-serif;text-align:center;margin-bottom:30px;color:var(--dark)}.form-group{margin-bottom:25px}.form-group label{display:block;font-weight:600;margin-bottom:10px;color:var(--dark)}.donation-tabs,.amount-options,.payment-methods{display:flex;gap:10px}.tab-btn,.amount-btn,.payment-btn{flex:1;padding:12px;font-size:16px;font-weight:500;border:2px solid var(--light-gray);border-radius:8px;background:#fff;cursor:pointer;transition:var(--transition);font-family:'Poppins',sans-serif}.tab-btn:hover,.amount-btn:hover,.payment-btn:hover{border-color:var(--primary-dark)}.tab-btn.active,.amount-btn.active,.payment-btn.active{background-color:var(--primary);color:#fff;border-color:var(--primary);font-weight:600}.input-with-icon{position:relative}.input-with-icon span{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:16px;font-weight:600}.input-with-icon input{width:100%;padding:12px 15px 12px 35px;border:2px solid var(--light-gray);border-radius:8px;font-size:16px;font-family:'Poppins',sans-serif}.input-with-icon input:focus{outline:0;border-color:var(--primary)}.full-width{width:100%;padding:15px;font-size:18px}.receipt{text-align:center;background:var(--light);padding:20px;border-radius:10px;margin-bottom:25px}.receipt p{color:var(--gray);margin-bottom:5px}.receipt h3{font-family:'Montserrat',sans-serif;font-size:2.5rem;color:var(--primary)}.payment-methods{flex-direction:column}.anonymous-toggle .toggle-label{display:flex;align-items:center;cursor:pointer;color:var(--gray);font-weight:500}.toggle-input{display:none}.toggle-slider{position:relative;width:44px;height:24px;background-color:var(--light-gray);border-radius:34px;transition:background-color .3s;margin-right:12px}.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;border-radius:50%;transition:transform .3s}.toggle-input:checked+.toggle-slider{background-color:var(--primary)}.toggle-input:checked+.toggle-slider:before{transform:translateX(20px)}#selected-cause{background-color:var(--light);cursor:not-allowed;font-weight:500;color:var(--gray);width:100%;border:2px solid var(--light-gray);padding:12px 15px;border-radius:8px;font-size:16px;font-family:'Poppins',sans-serif}#donor-details-group input{width:100%;padding:12px 15px;border:2px solid var(--light-gray);border-radius:8px;font-size:16px;font-family:'Poppins',sans-serif}#donor-details-group input:focus{outline:0;border-color:var(--primary)}.form-text{font-size:.85rem;color:var(--gray);margin-top:5px}#donor-name-wrapper{max-height:150px;overflow:hidden;transition:max-height .4s ease-out,opacity .3s ease-out,margin-bottom .4s ease-out;opacity:1;margin-bottom:15px}
+        
+        /* Validation and Error Styles */
+        .error-message{color:#e53935;font-size:.875rem;font-weight:500;margin-top:5px;display:none}.input-error{border-color:#e53935!important}.payment-methods.input-error .payment-btn:not(.active){border-color:#e53935}
+        
+        /* Crypto and Status Styles */
+        .crypto-tabs{display:flex;gap:10px}.crypto-tab-btn{flex:1;padding:10px;font-size:14px;border:2px solid var(--light-gray);border-radius:8px;background:#fff;cursor:pointer;transition:var(--transition)}.crypto-tab-btn.active{background-color:var(--secondary);color:#fff;border-color:var(--secondary)}#crypto-address-display .input-with-icon{position:relative}#crypto-address-display input{padding-right:45px;font-size:.9rem}#copy-address-btn{position:absolute;right:1px;top:1px;bottom:1px;width:40px;background:var(--light-gray);border:none;border-radius:0 7px 7px 0;cursor:pointer;color:var(--gray)}#copy-address-btn:hover{background:var(--gray);color:#fff}.copy-feedback{font-size:.8rem;color:var(--secondary);font-weight:500;margin-top:5px;height:1.2em}#status-modal-overlay{background:rgba(255,255,255,.85);backdrop-filter:blur(5px)}.spinner{border:5px solid var(--light-gray);border-top:5px solid var(--primary);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;margin:0 auto 20px}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+        
+        /* Responsive Styles */
+        @media (max-width:992px){.hamburger-menu{display:block}.nav-links{position:absolute;top:100%;left:0;width:100%;background-color:#fff;box-shadow:0 10px 20px rgba(0,0,0,.1);flex-direction:column;align-items:center;padding:10px 0;max-height:0;opacity:0;overflow:hidden;transition:max-height .4s ease-in-out,opacity .3s ease-in-out}.nav-links.active{max-height:500px;opacity:1;padding:20px 0}.nav-links li{margin:15px 0;width:100%;text-align:center}.nav-links a.nav-btn{display:inline-block;width:auto}}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <i class="fas fa-hands-helping"></i>
+                <a href="hopeaid.html" class="logo"><img src="assets/img/1750.png" alt="logo"></a>
+                <ul class="nav-links" id="nav-menu">
+                    <li><a href="hopeaid.html">Home</a></li>
+                    <li><a href="aboutus.html">About</a></li>
+                    <li><a href="causes.html">Causes</a></li>
+                    <li><a href="stories.html">Stories</a></li>
+                    <li><a href="partners.html">Partners</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="#" class="nav-btn" data-action="open-modal">Donate Now</a></li>
+                </ul>
+                <div class="hamburger-menu" id="hamburger-menu"><i class="fas fa-bars"></i></div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="container section-title">
+                <h2>Our Causes</h2>
+                <p>We channel support into four key areas to address the most urgent humanitarian needs.</p>
+            </div>
+        </section>
+
+        <!-- Causes Grid -->
+        <section class="causes-section">
+            <div class="container">
+                <div class="causes-grid">
+                    <div class="cause-card">
+                        <div class="cause-icon"><i class="fas fa-bullhorn"></i></div>
+                        <h3>Emergency Relief</h3>
+                        <ul>
+                            <li><a href="#" data-action="open-modal" data-cause="Gaza Emergency Relief">Gaza Emergency Relief</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Ukraine Emergency Relief">Ukraine Emergency Relief</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Sudan Conflict Relief">Sudan Conflict Relief</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="DR Congo Conflict Relief">DR Congo Conflict Relief</a></li>
+                        </ul>
+                    </div>
+   
+                    <div class="cause-card">
+                        <div class="cause-icon"><i class="fas fa-heartbeat"></i></div>
+                        <h3>Health & Medical</h3>
+                        <ul>
+                            <li><a href="#" data-action="open-modal" data-cause="Medical Support Outreach in DR Congo">Medical Support Outreach in DR Congo</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Emergency Clinics in Sudan">Emergency Clinics in Sudan</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Mobile Health Units in Gaza">Mobile Health Units in Gaza</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Primary Health for Children in Ethiopia & Nigeria">Primary Health for Children in Ethiopia & Nigeria</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="cause-card">
+                        <div class="cause-icon"><i class="fas fa-book-open"></i></div>
+                        <h3>Education</h3>
+                        <ul>
+                            <li><a href="#" data-action="open-modal" data-cause="Education for Refugee Children">Education for Refugee Children</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Learning for War-Affected Youth">Learning for War-Affected Youth</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="School Supplies & Teacher Training">School Supplies & Teacher Training</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="cause-card">
+                        <div class="cause-icon"><i class="fas fa-tint"></i></div>
+                        <h3>Food & Water</h3>
+                        <ul>
+                            <li><a href="#" data-action="open-modal" data-cause="Clean Water for Sudan">Clean Water for Sudan</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Food Supplies in Gaza">Food Supplies in Gaza</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Nutritional Aid for Refugee Camps">Nutritional Aid for Refugee Camps</a></li>
+                            <li><a href="#" data-action="open-modal" data-cause="Winter Relief & Food Packages">Winter Relief & Food Packages</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col"><h3>Aid Without Borders</h3><p>Connecting compassionate donors with critical humanitarian projects in the world's most vulnerable regions.</p><div class="social-links"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a></div></div>
+                <div class="footer-col"><h3>Quick Links</h3><ul class="footer-links"><li><a href="hopeaid.html">Home</a></li><li><a href="aboutus.html">About Us</a></li><li><a href="causes.html">Our Causes</a></li></ul></div>
+                <div class="footer-col"><h3>Contact Us</h3><p><i class="fas fa-map-marker-alt"></i> 1598 St. John Street, <br>Cape Town, Western Cape</p><p><i class="fas fa-phone"></i> +27 02 144 0768</p><p><i class="fas fa-envelope"></i> contact@awb-intl.org</p></div>
+            </div>
+            <div class="copyright"><p>© 2025 Aid Without Borders International. All rights reserved. Together, we make a difference.</p></div>
+        </div>
+    </footer>
+    
+    <!-- === CORRECTED MODAL AND STATUS MODAL STRUCTURE === -->
+    <div class="modal-overlay" id="donation-modal-overlay">
+        <div class="modal-content" id="donation-modal-content">
+            <button class="modal-close" data-action="close-modal">×</button>
+            <!-- STEP 1 -->
+            <div class="modal-step" id="modal-step-1">
+                <h2>Make a Donation</h2>
+                <div class="form-group"><label>Select Donation Type</label><div class="donation-tabs"><button class="tab-btn active" data-type="One-time">One-time</button><button disabled class="tab-btn" data-type="Monthly">Monthly</button></div></div>
+                <div class="form-group"><label>Choose an Amount</label><div class="amount-options"><button class="amount-btn" data-amount="25">$25</button><button class="amount-btn active" data-amount="50">$50</button><button class="amount-btn" data-amount="75">$75</button><button class="amount-btn" data-amount="100">$100</button></div></div>
+                <div class="form-group"><label for="custom-amount">Or Enter a Custom Amount</label><div class="input-with-icon"><span>$</span><input type="number" id="custom-amount" placeholder="50.00" step="1"></div></div>
+                <div class="form-group" id="cause-display-group" style="display: none;"><label for="selected-cause">For the Cause Of</label><input type="text" id="selected-cause" readonly></div>
+                <button class="btn btn-primary full-width" id="proceed-to-payment-btn">Proceed</button>
+            </div>
+            <!-- STEP 2 -->
+            <div class="modal-step" id="modal-step-2" style="display: none;">
+                <h2>Confirm Your Donation</h2>
+                <div class="receipt"><p>You are about to make a <strong id="summary-type">One-time</strong> donation of</p><h3 id="summary-amount">$50.00</h3><p id="summary-cause-text" style="font-weight: 600; margin-top: 10px; color: var(--primary);"></p></div>
+                <div class="form-group" id="donor-details-group"><div id="donor-name-wrapper"><label for="donor-name">Your Name</label><input type="text" id="donor-name" placeholder="e.g. Jane Doe" required><p class="error-message" id="name-error"></p></div><label for="donor-email" style="margin-top: 15px;">Your Email Address</label><input type="email" id="donor-email" placeholder="e.g. jane@example.com" required><p class="form-text">Your receipt will be sent here.</p><p class="error-message" id="email-error"></p></div>
+                <div class="form-group anonymous-toggle"><label for="anonymous-switch" class="toggle-label"><input type="checkbox" id="anonymous-switch" class="toggle-input"><span class="toggle-slider"></span> Donate anonymously</label></div>
+                <div class="form-group"><label>Select Payment Method</label><div class="payment-methods"><button class="payment-btn" data-method="PayPal"><i class="fab fa-paypal"></i> PayPal</button><button class="payment-btn" data-method="CashApp"><i class="fas fa-dollar-sign"></i> CashApp</button><button class="payment-btn" id="crypto-btn" data-method="Crypto"><i class="fab fa-bitcoin"></i> Crypto</button></div><div id="crypto-options" style="display: none; margin-top: 15px;"><div class="crypto-tabs"><button class="crypto-tab-btn" data-crypto="BTC">BTC</button><button class="crypto-tab-btn" data-crypto="ERC20">ERC-20 (USDT)</button><button class="crypto-tab-btn" data-crypto="TRC20">TRC-20 (USDT)</button></div><div id="crypto-address-display" style="display: none; margin-top: 10px;"><p style="font-size: 0.9rem; color: var(--gray);">Send your donation to the address below:</p><div class="input-with-icon" style="margin-top: 5px;"><input type="text" id="crypto-address-input" readonly><button id="copy-address-btn" title="Copy to clipboard"><i class="far fa-copy"></i></button></div><p class="copy-feedback" id="copy-feedback-text"></p></div></div><p class="error-message" id="payment-error"></p></div>
+                <button class="btn btn-primary full-width" id="final-donate-btn">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="status-modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <div id="status-loading"><div class="spinner"></div><h3>Processing Payment...</h3><p>You have been redirected to complete your payment. Please do not close this window.</p></div>
+            <div id="status-timeout" style="display: none;"><i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i><h3>We couldn't verify your payment yet.</h3><p>Thank you for your donation! We're awaiting confirmation. Once verified, we will send a receipt to your email address. Your support means the world to us!</p><button class="btn btn-primary" id="status-close-btn" style="margin-top: 20px;">Close</button></div>
+        </div>
+    </div>
+
+    <!-- UNIFIED & CORRECTED SCRIPT -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 1. All Variable Declarations ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        const animatedElements = document.querySelectorAll('.step-card, .story-card, .section-title');
+        const statItems = document.querySelectorAll('.stat-item');
+        const hamburger = document.getElementById('hamburger-menu');
+        const navMenu = document.getElementById('nav-menu');
+        const icon = hamburger.querySelector('i');
+
+        // Modal Elements
+        const modalOverlay = document.getElementById('donation-modal-overlay');
+        const openModalButtons = document.querySelectorAll('[data-action="open-modal"]');
+        const closeModalButtons = document.querySelectorAll('[data-action="close-modal"]');
+        const step1 = document.getElementById('modal-step-1');
+        const step2 = document.getElementById('modal-step-2');
+        const proceedBtn = document.getElementById('proceed-to-payment-btn');
+        const finalDonateBtn = document.getElementById('final-donate-btn');
+
+        // Form & State Elements
+        const donationTypeTabs = document.querySelectorAll('.tab-btn');
+        const amountButtons = document.querySelectorAll('.amount-btn');
+        const customAmountInput = document.getElementById('custom-amount');
+        const causeDisplayGroup = document.getElementById('cause-display-group');
+        const selectedCauseInput = document.getElementById('selected-cause');
+        const summaryType = document.getElementById('summary-type');
+        const summaryAmount = document.getElementById('summary-amount');
+        const summaryCauseText = document.getElementById('summary-cause-text');
+        const anonymousSwitch = document.getElementById('anonymous-switch');
+        const donorNameWrapper = document.getElementById('donor-name-wrapper');
+        const donorNameInput = document.getElementById('donor-name');
+        const donorEmailInput = document.getElementById('donor-email');
+
+        // Payment Elements
+        const paymentMethodsContainer = document.querySelector('.payment-methods');
+        const paymentMethodBtns = document.querySelectorAll('.payment-btn');
+        const cryptoBtn = document.getElementById('crypto-btn');
+        const cryptoOptions = document.getElementById('crypto-options');
+        const cryptoTabs = document.querySelectorAll('.crypto-tab-btn');
+        const cryptoAddressDisplay = document.getElementById('crypto-address-display');
+        const cryptoAddressInput = document.getElementById('crypto-address-input');
+        const copyAddressBtn = document.getElementById('copy-address-btn');
+        const copyFeedbackText = document.getElementById('copy-feedback-text');
+
+        // Validation & Status Elements
+        const nameError = document.getElementById('name-error');
+        const emailError = document.getElementById('email-error');
+        const paymentError = document.getElementById('payment-error');
+        const statusModalOverlay = document.getElementById('status-modal-overlay');
+        const statusLoading = document.getElementById('status-loading');
+        const statusTimeout = document.getElementById('status-timeout');
+        const statusCloseBtn = document.getElementById('status-close-btn');
+
+        // --- 2. Configuration & State ---
+        const paymentLinks = {
+            PayPal: 'https://paypal.me/YourUsername', // <-- IMPORTANT: REPLACE
+            CashApp: 'https://cash.app/$YourCashtag'  // <-- IMPORTANT: REPLACE
+        };
+        const cryptoAddresses = {
+            BTC: 'bc1q...',   // <-- IMPORTANT: REPLACE
+            ERC20: '0x...', // <-- IMPORTANT: REPLACE
+            TRC20: 'T...'     // <-- IMPORTANT: REPLACE
+        };
+        
+        let state = { amount: 50, type: 'One-time', paymentMethod: null, cause: null };
+        let visibilityChangeTimer;
+
+        // --- 3. All Functions ---
+        animatedElements.forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        statItems.forEach(item => {
+            const statObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    const h3 = item.querySelector('h3');
+                    const target = +h3.innerText.replace(/\D/g,'');
+                    // ... your stats counter logic ...
+                    statObserver.unobserve(item);
+                }
+            });
+            statObserver.observe(item);
+        });
+
+        function openModal() { modalOverlay.classList.add('active'); }
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            setTimeout(() => {
+                step1.style.display = 'block';
+                step2.style.display = 'none';
+            }, 300);
+        }
+
+        function handlePaymentRedirect(url) {
+            statusLoading.style.display = 'block';
+            statusTimeout.style.display = 'none';
+            statusModalOverlay.classList.add('active');
+            window.open(url, '_blank');
+
+            const handleVisibilityChange = () => {
+                if (document.visibilityState === 'visible') {
+                    clearTimeout(visibilityChangeTimer);
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+                }
+            };
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            visibilityChangeTimer = setTimeout(() => {
+                statusLoading.style.display = 'none';
+                statusTimeout.style.display = 'block';
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }, 60000); // 60 seconds
+        }
+
+        function showError(inputElement, messageElement, message) { /* ... (same as before) ... */ }
+        function clearError(inputElement, messageElement) { /* ... (same as before) ... */ }
+        function validateEmail(email) { /* ... (same as before) ... */ }
+        
+        // --- 4. All Event Listeners ---
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+        
+        openModalButtons.forEach(button => {
+            button.addEventListener('click', e => {
+                e.preventDefault();
+                const causeName = button.dataset.cause;
+                if (causeName) {
+                    state.cause = causeName;
+                    selectedCauseInput.value = causeName;
+                    causeDisplayGroup.style.display = 'block';
+                } else {
+                    state.cause = null;
+                    causeDisplayGroup.style.display = 'none';
+                }
+                openModal();
+            });
+        });
+
+        closeModalButtons.forEach(button => button.addEventListener('click', closeModal));
+        modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+
+        donationTypeTabs.forEach(tab => { tab.addEventListener('click', () => {
+            if (tab.disabled) return;
+            donationTypeTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            state.type = tab.dataset.type;
+        });});
+
+        amountButtons.forEach(button => { button.addEventListener('click', () => {
+            amountButtons.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            state.amount = parseFloat(button.dataset.amount);
+            customAmountInput.value = state.amount.toFixed(2);
+        });});
+
+        customAmountInput.addEventListener('input', () => {
+            amountButtons.forEach(b => b.classList.remove('active'));
+            const value = parseFloat(customAmountInput.value);
+            if (!isNaN(value)) { state.amount = value; }
+        });
+
+        proceedBtn.addEventListener('click', () => {
+            summaryType.textContent = state.type;
+            summaryAmount.textContent = `$${state.amount.toFixed(2)}`;
+            if (state.cause) {
+                summaryCauseText.textContent = `For: ${state.cause}`;
+                summaryCauseText.style.display = 'block';
+            } else {
+                summaryCauseText.style.display = 'none';
+            }
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+        });
+        
+        anonymousSwitch.addEventListener('change', () => {
+            const isChecked = anonymousSwitch.checked;
+            donorNameWrapper.style.maxHeight = isChecked ? '0' : '150px';
+            donorNameWrapper.style.opacity = isChecked ? '0' : '1';
+            donorNameWrapper.style.marginBottom = isChecked ? '0' : '15px';
+            donorNameInput.required = !isChecked;
+        });
+
+        paymentMethodBtns.forEach(button => { button.addEventListener('click', () => {
+            paymentMethodBtns.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            state.paymentMethod = button.dataset.method;
+            cryptoOptions.style.display = (button.id === 'crypto-btn') ? 'block' : 'none';
+        });});
+        
+        cryptoTabs.forEach(tab => { tab.addEventListener('click', () => {
+            cryptoTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const selectedCrypto = tab.dataset.crypto;
+            cryptoAddressInput.value = cryptoAddresses[selectedCrypto];
+            cryptoAddressDisplay.style.display = 'block';
+        });});
+        
+        copyAddressBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(cryptoAddressInput.value).then(() => {
+                copyFeedbackText.textContent = 'Address copied!';
+                setTimeout(() => { copyFeedbackText.textContent = ''; }, 2000);
+            });
+        });
+        
+        statusCloseBtn.addEventListener('click', () => {
+            statusModalOverlay.classList.remove('active');
+            closeModal();
+        });
+
+        finalDonateBtn.addEventListener('click', () => {
+            let isValid = true;
+            clearError(donorNameInput, nameError);
+            clearError(donorEmailInput, emailError);
+            clearError(paymentMethodsContainer, paymentError);
+
+            if (!anonymousSwitch.checked && !donorNameInput.value.trim()) {
+                showError(donorNameInput, nameError, 'Please enter your name.'); isValid = false;
+            }
+            if (!donorEmailInput.value.trim() || !validateEmail(donorEmailInput.value)) {
+                showError(donorEmailInput, emailError, 'Please enter a valid email address.'); isValid = false;
+            }
+            if (!state.paymentMethod) {
+                showError(paymentMethodsContainer, paymentError, 'Please select a payment method.'); isValid = false;
+            }
+            if (state.paymentMethod === 'Crypto' && !cryptoAddressInput.value) {
+                showError(paymentMethodsContainer, paymentError, 'Please select a crypto network.'); isValid = false;
+            }
+            if (!isValid) return;
+
+            const paymentMethod = state.paymentMethod;
+            if (paymentMethod === 'Stripe') {
+    handleStripeCheckout();
+} else if (paymentMethod === 'PayPal' || paymentMethod === 'CashApp') {
+                if (!paymentLinks[paymentMethod].includes('YourUsername') && !paymentLinks[paymentMethod].includes('YourCashtag')) {
+                    handlePaymentRedirect(paymentLinks[paymentMethod]);
+                } else {
+                    alert(`Error: The ${paymentMethod} link is not configured. Please contact support.`);
+                }
+            } else if (paymentMethod === 'Crypto') {
+                alert("Please send your donation to the copied address. We will verify your transaction and send a receipt. Thank you for your support!");
+                closeModal();
+            }
+        });
+
+    });
+    </script>
+</body>
+</html>

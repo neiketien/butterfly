@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Partners - Aid Without Borders</title>
+    <link rel="stylesheet" href="assets/css/mystyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <i class="fas fa-hands-helping"></i>
+                <a href="hopeaid.html" class="logo"><img src="assets/img/1750.png" alt="logo"></a>
+                <ul class="nav-links" id="nav-menu">
+                    <li><a href="hopeaid.html">Home</a></li>
+                    <li><a href="aboutus.html">About</a></li>
+                    <li><a href="causes.html">Causes</a></li>
+                    <li><a href="stories.html">Stories</a></li>
+                    <li><a href="partners.html">Partners</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="#" class="nav-btn" data-action="open-modal">Donate Now</a></li>
+                </ul>
+                <div class="hamburger-menu" id="hamburger-menu"><i class="fas fa-bars"></i></div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="container section-title">
+                <h2>Our Trusted Partners</h2>
+                <p>Collaborating with reputable NGOs to maximize impact in crisis regions.</p>
+            </div>
+        </section>
+
+        <section class="partners-section">
+            <div class="container">
+                <p class="partner-intro">We are proud to collaborate with a growing network of internationally respected humanitarian organizations who work directly in some of the world's most dangerous and difficult environments.</p>
+                <div class="partner-grid">
+                    <div class="partner-item">HEAL Palestine</div>
+                    <div class="partner-item">CARE</div>
+                    <div class="partner-item">Anera</div>
+                    <div class="partner-item">Mercy Corps</div>
+                    <div class="partner-item">United Help Ukraine</div>
+                    <div class="partner-item">Voices of Children</div>
+                    <div class="partner-item">Nova Ukraine</div>
+                    <div class="partner-item">Save the Children</div>
+                    <div class="partner-item">Sudanese Red Crescent Society</div>
+                </div>
+                <p class="partner-outro">AWB rigorously vets all partners to ensure alignment with our mission and values, prioritizing accountability and measurable outcomes.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Aid Without Borders</h3>
+                    <p>Connecting compassionate donors with critical humanitarian projects in the world's most vulnerable regions.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="hopeaid.html">Home</a></li>
+                        <li><a href="aboutus.html">About Us</a></li>
+                        <li><a href="causes.html">Our Causes</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> 1598 St. John Street, <br>Cape Town, Western Cape</p>
+                    <p><i class="fas fa-phone"></i> +27 02 144 0768</p>
+                    <p><i class="fas fa-envelope"></i> contact@awb-intl.org</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Aid Without Borders International. All rights reserved. Together, we make a difference.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Donation Modal HTML -->
+    <div class="modal-overlay" id="donation-modal-overlay">
+    <div class="modal-content" id="donation-modal-content">
+        <button class="modal-close" data-action="close-modal">×</button>
+
+        <!-- STEP 1: Amount & Type Selection -->
+        <div class="modal-steps-container">
+        <div class="modal-step" id="modal-step-1">
+            <h2>Make a Donation</h2>
+            <div class="form-group">
+                <label>Select Donation Type</label>
+                <div class="donation-tabs">
+                    <button class="tab-btn active" data-type="One-time">One-time</button>
+                    <button disabled class="tab-btn" data-type="Monthly">Monthly</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Choose an Amount</label>
+                <div class="amount-options">
+                    <button class="amount-btn" data-amount="25">$25</button>
+                    <button class="amount-btn active" data-amount="50">$50</button>
+                    <button class="amount-btn" data-amount="75">$75</button>
+                    <button class="amount-btn" data-amount="100">$100</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="custom-amount">Or Enter a Custom Amount</label>
+                <div class="input-with-icon">
+                    <span>$</span>
+                    <input type="number" id="custom-amount" placeholder="50.00" step="1">
+                </div>
+            </div>
+            
+            <div class="form-group" id="cause-display-group" style="display: none;">
+                <label for="selected-cause">For the Cause Of</label>
+                <input type="text" id="selected-cause" readonly>
+            </div>
+            
+            <button class="btn btn-primary full-width" id="proceed-to-payment-btn">
+                Proceed
+            </button>
+        </div>
+
+        <!-- STEP 2: Confirmation & Payment -->
+        <div class="modal-step" id="modal-step-2" style="display: none;">
+             <h2>Confirm Your Donation</h2>
+             <div class="receipt">
+                 <p>You are about to make a <strong id="summary-type">One-time</strong> donation of
+                 </p>
+                 <h3 id="summary-amount">$50.00</h3>
+                 <p id="summary-cause-text" style="font-weight: 600; margin-top: 10px; color: var(--primary);">
+                 </p>
+             </div>
+             <div class="form-group" id="donor-details-group">
+                 <div id="donor-name-wrapper">
+                     <label for="donor-name">Your Name</label>
+                     <input type="text" id="donor-name" placeholder="" required>
+                     <p class="error-message" id="name-error"></p>
+                 </div>       
+                 <label for="donor-email" style="margin-top: 15px;">Your Email Address</label>
+                 <input type="email" id="donor-email" placeholder="" required>
+                 <p class="error-message" id="email-error"></p>
+                 <p class="form-text">Your receipt will be sent here.</p>
+             </div>
+    
+             <div class="form-group anonymous-toggle">
+                 <label for="anonymous-switch" class="toggle-label">
+                     <input type="checkbox" id="anonymous-switch" class="toggle-input">
+                     <span class="toggle-slider"></span>
+                     Donate anonymously
+                 </label>
+             </div>
+             <div class="form-group">
+                <label>Select Payment Method</label>
+                <div class="payment-methods">        
+                     <button class="payment-btn" data-method="PayPal">
+                        <i class="fab fa-paypal"></i> PayPal
+                    </button>
+                    <button class="payment-btn" data-method="CashApp">
+                        <i class="fa-solid fa-dollar-sign"></i> CashApp
+                    </button>
+                    <button class="payment-btn" id="crypto-btn" data-method="Crypto">
+                        <i class="fab fa-bitcoin"></i> Crypto
+                    </button>
+                </div>
+                <div id="crypto-options" style="display: none; margin-top: 15px;">
+                    <div class="crypto-tabs">
+                        <button class="crypto-tab-btn" data-crypto="BTC">BTC</button>
+                        <button class="crypto-tab-btn" data-crypto="ERC20">ERC-20 (USDT)</button>
+                        <button class="crypto-tab-btn" data-crypto="TRC20">TRC-20 (USDT)</button>
+                   </div>
+                   <div id="crypto-address-display" style="display: none; margin-top: 10px;">
+                       <p style="font-size: 0.9rem; color: var(--gray);">Send your donation to the address below:</p>
+                       <div class="input-with-icon" style="margin-top: 5px;">
+                           <input type="text" id="crypto-address-input" readonly>
+                           <button id="copy-address-btn" title="Copy to clipboard"><i class="far fa-copy"></i></button>
+                </div>
+                <p class="copy-feedback" id="copy-feedback-text"></p>
+             </div>
+            </div>
+                <p class="error-message" id="payment-error"></p>
+             </div>
+             
+             <button class="btn btn-primary full-width" id="final-donate-btn" style="margin-top: 20px;">Complete Donation</button>
+             </div>
+             <div class="modal-overlay" id="status-modal-overlay">
+    <div class="modal-content" style="text-align: center;">
+        <div id="status-loading">
+            <div class="spinner"></div>
+            <h3>Processing Payment...</h3>
+            <p>You have been redirected to complete your payment. Please do not close this window.</p>
+        </div>
+        <div id="status-timeout" style="display: none;">
+            <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
+            <h3>We couldn't verify your payment yet.</h3>
+            <p>Thank you for your donation! We're awaiting confirmation. Once verified, we will send a receipt to your email address. Your support means the world to us!</p>
+            <button class="btn btn-primary" id="status-close-btn" style="margin-top: 20px;">Close</button>
+        </div>
+        <div id="status-crypto" style="display: none;">
+            <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success); margin-bottom: 20px;"></i>
+            <h3>Thank You for Your Donation!</h3>
+            <p>Please send your donation to the copied address. We will verify your transaction and send a receipt to your email address. Your support means the world to us!</p>
+            <button class="btn btn-primary" id="status-crypto-close-btn" style="margin-top: 20px;">Close</button>
+        </div>
+    </div>
+</div>
+<!-- === END: DONATION MODAL === -->
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- 1. ALL VARIABLE DECLARATIONS ---
+    
+    // Page Animation & Stats Elements
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = 1;
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    const animatedElements = document.querySelectorAll('.step-card, .story-card, .section-title');
+    const statItems = document.querySelectorAll('.stat-item');
+
+    // Navigation Elements
+    const hamburger = document.getElementById('hamburger-menu');
+    const navMenu = document.getElementById('nav-menu');
+    const icon = hamburger.querySelector('i');
+
+    // Modal Elements
+    const modalOverlay = document.getElementById('donation-modal-overlay');
+    const openModalButtons = document.querySelectorAll('[data-action="open-modal"]');
+    const closeModalButtons = document.querySelectorAll('[data-action="close-modal"]');
+    const step1 = document.getElementById('modal-step-1');
+    const step2 = document.getElementById('modal-step-2');
+    const proceedBtn = document.getElementById('proceed-to-payment-btn');
+    const finalDonateBtn = document.getElementById('final-donate-btn');
+
+    // Form & State Elements
+    const donationTypeTabs = document.querySelectorAll('.tab-btn');
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    const customAmountInput = document.getElementById('custom-amount');
+    const causeDisplayGroup = document.getElementById('cause-display-group');
+    const selectedCauseInput = document.getElementById('selected-cause');
+    const summaryType = document.getElementById('summary-type');
+    const summaryAmount = document.getElementById('summary-amount');
+    const summaryCauseText = document.getElementById('summary-cause-text');
+    const anonymousSwitch = document.getElementById('anonymous-switch');
+    const donorNameWrapper = document.getElementById('donor-name-wrapper');
+    const donorNameInput = document.getElementById('donor-name');
+    const donorEmailInput = document.getElementById('donor-email');
+
+    // Payment Elements
+    const paymentMethodsContainer = document.querySelector('.payment-methods');
+    const paymentMethodBtns = document.querySelectorAll('.payment-btn');
+    const cryptoBtn = document.getElementById('crypto-btn');
+    const cryptoOptions = document.getElementById('crypto-options');
+    const cryptoTabs = document.querySelectorAll('.crypto-tab-btn');
+    const cryptoAddressDisplay = document.getElementById('crypto-address-display');
+    const cryptoAddressInput = document.getElementById('crypto-address-input');
+    const copyAddressBtn = document.getElementById('copy-address-btn');
+    const copyFeedbackText = document.getElementById('copy-feedback-text');
+
+    // Validation & Status Elements
+    const nameError = document.getElementById('name-error');
+    const emailError = document.getElementById('email-error');
+    const paymentError = document.getElementById('payment-error');
+    const statusModalOverlay = document.getElementById('status-modal-overlay');
+    const statusLoading = document.getElementById('status-loading');
+    const statusTimeout = document.getElementById('status-timeout');
+    const statusCloseBtn = document.getElementById('status-close-btn');
+    const statusCrypto = document.getElementById('status-crypto');
+    const statusCryptoCloseBtn = document.getElementById('status-crypto-close-btn');
+
+    // --- 2. CONFIGURATION & STATE ---
+    
+    // IMPORTANT: Replace these placeholder values with your actual links and addresses!
+    const paymentLinks = {
+        Stripe: 'https://buy.stripe.com/YOUR_LINK_HERE', // <-- REPLACE
+        PayPal: 'https://paypal.me/YourUsername',       // <-- REPLACE
+        CashApp: 'https://cash.app/$YourCashtag'         // <-- REPLACE
+    };
+    const cryptoAddresses = {
+        BTC: 'YOUR_BITCOIN_ADDRESS_HERE',        // <-- REPLACE
+        ERC20: 'YOUR_ERC20_ADDRESS_HERE',      // <-- REPLACE
+        TRC20: 'YOUR_TRC20_ADDRESS_HERE'         // <-- REPLACE
+    };
+    
+    let state = { amount: 50, type: 'One-time', paymentMethod: null, cause: null };
+    let visibilityChangeTimer;
+
+    // --- 3. ALL HELPER FUNCTIONS ---
+    
+    // Modal Management
+    function openModal() { modalOverlay.classList.add('active'); }
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        setTimeout(() => { // Reset form after transition
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+        }, 300);
+    }
+
+    // Payment Redirection
+    function handlePaymentRedirect(url) {
+        statusLoading.style.display = 'block';
+        statusTimeout.style.display = 'none';
+        statusModalOverlay.classList.add('active');
+        window.open(url, '_blank');
+        
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                clearTimeout(visibilityChangeTimer);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        visibilityChangeTimer = setTimeout(() => {
+            statusLoading.style.display = 'none';
+            statusTimeout.style.display = 'block';
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        }, 60000); // 60 seconds
+    }
+
+    // Validation
+    function showError(inputElement, messageElement, message) {
+        messageElement.textContent = message;
+        messageElement.style.display = 'block';
+        inputElement.classList.add('input-error');
+    }
+    function clearError(inputElement, messageElement) {
+        messageElement.textContent = '';
+        messageElement.style.display = 'none';
+        inputElement.classList.remove('input-error');
+    }
+    function validateEmail(email) {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    // --- 4. INITIALIZATIONS & EVENT LISTENERS ---
+
+    // Initial page animations
+    animatedElements.forEach(el => {
+        el.style.opacity = 0;
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+
+    statItems.forEach(item => {
+        const statObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                const h3 = item.querySelector('h3');
+                const target = +h3.innerText.replace(/\D/g, '');
+                let count = 0;
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                
+                const updateCount = () => {
+                    count += increment;
+                    if (count < target) {
+                        h3.innerText = Math.ceil(count).toLocaleString() + (h3.innerText.includes('+') ? '+' : '');
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        h3.innerText = target.toLocaleString() + (h3.innerText.includes('+') ? '+' : '');
+                    }
+                };
+                updateCount();
+                statObserver.unobserve(item);
+            }
+        }, { threshold: 0.5 });
+        statObserver.observe(item);
+    });
+    
+    // Hamburger Menu
+    hamburger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
+    });
+
+    // Modal Triggers
+    openModalButtons.forEach(button => {
+        button.addEventListener('click', e => {
+            e.preventDefault();
+            const causeName = button.dataset.cause;
+            if (causeName) {
+                state.cause = causeName;
+                selectedCauseInput.value = causeName;
+                causeDisplayGroup.style.display = 'block';
+            } else {
+                state.cause = null;
+                causeDisplayGroup.style.display = 'none';
+            }
+            openModal();
+        });
+    });
+    closeModalButtons.forEach(button => button.addEventListener('click', closeModal));
+    modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+    statusCloseBtn.addEventListener('click', () => {
+        statusModalOverlay.classList.remove('active');
+        closeModal();
+    });
+    
+    statusCryptoCloseBtn.addEventListener('click', () => {
+    statusModalOverlay.classList.remove('active');
+    closeModal(); // Close both modals
+});
+
+    // Step 1: Donation Selection
+    donationTypeTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.disabled) return;
+            donationTypeTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            state.type = tab.dataset.type;
+        });
+    });
+    amountButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            amountButtons.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            state.amount = parseFloat(button.dataset.amount);
+            customAmountInput.value = state.amount.toFixed(2);
+        });
+    });
+    customAmountInput.addEventListener('input', () => {
+        amountButtons.forEach(b => b.classList.remove('active'));
+        const value = parseFloat(customAmountInput.value);
+        if (!isNaN(value)) { state.amount = value; }
+    });
+    proceedBtn.addEventListener('click', () => {
+        summaryType.textContent = state.type;
+        summaryAmount.textContent = `$${state.amount.toFixed(2)}`;
+        if (state.cause) {
+            summaryCauseText.textContent = `For: ${state.cause}`;
+            summaryCauseText.style.display = 'block';
+        } else {
+            summaryCauseText.style.display = 'none';
+        }
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+    });
+
+    // Step 2: Confirmation and Payment
+    anonymousSwitch.addEventListener('change', () => {
+        const isChecked = anonymousSwitch.checked;
+        donorNameWrapper.style.maxHeight = isChecked ? '0' : '150px';
+        donorNameWrapper.style.opacity = isChecked ? '0' : '1';
+        donorNameWrapper.style.marginBottom = isChecked ? '0' : '15px';
+        donorNameInput.required = !isChecked;
+    });
+
+    paymentMethodBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            paymentMethodBtns.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            state.paymentMethod = button.dataset.method;
+            cryptoOptions.style.display = (button.id === 'crypto-btn') ? 'block' : 'none';
+        });
+    });
+
+    cryptoTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            cryptoTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const selectedCrypto = tab.dataset.crypto;
+            cryptoAddressInput.value = cryptoAddresses[selectedCrypto];
+            cryptoAddressDisplay.style.display = 'block';
+        });
+    });
+    
+    copyAddressBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(cryptoAddressInput.value).then(() => {
+            copyFeedbackText.textContent = 'Address copied!';
+            setTimeout(() => { copyFeedbackText.textContent = ''; }, 2000);
+        });
+    });
+
+    // Final Validation and Action
+    finalDonateBtn.addEventListener('click', () => {
+        let isValid = true;
+        clearError(donorNameInput, nameError);
+        clearError(donorEmailInput, emailError);
+        clearError(paymentMethodsContainer, paymentError);
+
+        if (!anonymousSwitch.checked && !donorNameInput.value.trim()) {
+            showError(donorNameInput, nameError, 'Please enter your name.'); isValid = false;
+        }
+        if (!donorEmailInput.value.trim() || !validateEmail(donorEmailInput.value)) {
+            showError(donorEmailInput, emailError, 'Please enter a valid email address.'); isValid = false;
+        }
+        if (!state.paymentMethod) {
+            showError(paymentMethodsContainer, paymentError, 'Please select a payment method.'); isValid = false;
+        }
+        if (state.paymentMethod === 'Crypto' && !cryptoAddressInput.value) {
+            showError(paymentMethodsContainer, paymentError, 'Please select a crypto network.'); isValid = false;
+        }
+        if (!isValid) return;
+        
+        const donationId = `AWB-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+    // b. Prepare the data payload for the email
+    const formData = {
+        _subject: `New Donation! ID: ${donationId}`,
+        Donation_ID: donationId,
+        Donor_Name: anonymousSwitch.checked ? 'Anonymous' : donorNameInput.value.trim(),
+        Donor_Email: donorEmailInput.value.trim(),
+        Amount: `$${state.amount.toFixed(2)}`,
+        Type: state.type,
+        Cause: state.cause || 'General Donation',
+        Payment_Method: state.paymentMethod,
+        Timestamp: new Date().toUTCString()
+    };
+    
+    // c. Send the data to Formsubmit in the background
+    fetch('https://formsubmit.co/vidat40649@pacfut.com', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => console.log('Donation details sent successfully:', data))
+    .catch(error => console.error('Error sending donation details:', error));
+
+        const paymentMethod = state.paymentMethod;
+        if (paymentMethod === 'Stripe' || paymentMethod === 'PayPal' || paymentMethod === 'CashApp') {
+            const link = paymentLinks[paymentMethod];
+            if (link && !link.includes('YOUR_') && !link.includes('YourUsername') && !link.includes('YourCashtag')) {
+                handlePaymentRedirect(link);
+            } else {
+                alert(`Error: The ${paymentMethod} link is not configured. Please contact support.`);
+            }
+        } else if (paymentMethod === 'Crypto') {
+            statusLoading.style.display = 'none';
+        statusTimeout.style.display = 'none';
+        statusCrypto.style.display = 'block';
+        statusModalOverlay.classList.add('active');
+    }
+    });
+
+});
+</script>
+</body>
+</html>
